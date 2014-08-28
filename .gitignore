@@ -1,0 +1,22 @@
+*~
+.dev/
+.idea/
+.test/
+.tmp/
+.user_config
+bower_components/
+dist/
+node_modules/
+test-reports/
+*.dump
+\#*\#
+*.orig
+\#vm.args\#
+tags
+
+# Patterns for Vim temporary files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
