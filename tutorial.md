@@ -4,6 +4,7 @@
   - [Overview](#user-content-overview)
   - [Precompiling Underscore Templates](#user-content-precompiling-underscore-templates)
   - [Grunt task for Precompiled Templates](#user-content-grunt-task-for-precompiled-templates)
+  - [Convert from Underscore templates to Handlebars](#user-content-convert-from-underscore-templates-to-handlebars)
   - [References](#user-content-references)
 
 ## Overview
@@ -45,7 +46,7 @@ The code used to show this template is:
   this.$el.html(template);
 ```
 
-This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second object is some object that the template will interpolate.
+This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second argument is some object that the template will interpolate.
 
 A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use. 
 
@@ -82,6 +83,40 @@ This code is very similar to the actual call to undersocres `template` function 
 Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.  The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
 
 ## Grunt Task for Precompiled Templates
+To pre-compile templates outside of the application we will use [Grunt](http://gruntjs.com/). Grunt requires [Node](nodejs.org) to be installed.
+
+If you do not already have it, please install [Node](nodejs.org) now.
+
+After Node is installed, you can install Grunt globally with the following command:
+
+```shell
+npm install -g grunt-cli
+```
+
+If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now and use `npm` commands to add to it later.
+
+Grunt allows the use of plugins. a Grunt plugin is a Node package that can be published via NPM. For what we are tring to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
+
+Once you are familiar with Grunt and the purpose of the package.json file, then you may install this plugin with this command:
+
+```shell
+npm install grunt-contrib-jst --save-dev
+```
+
+This command will install the grunt-contrib-jst plugin and update your local `package.json` file with it so that others that pull down your repo can run an `npm install` and have it automatically installed.
+
+Your new `package.json` should look like this:
+
+```javascript
+{
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jst": "^0.6.0"
+  }
+}
+```
+
+## Convert from Underscore templates to Handlebars
 
 
 ## References
