@@ -14,12 +14,77 @@ The process of building up a deployable application includes making the source c
 I hope you find this tutorial helps you with your JavaScript product development workflow.
 
 ## Precompiling Underscore Templates
+As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](underscorejs.org). Underscore is a JavaScript library that provides many helpful functions.  One of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
 
-The basic app used templates for this very purpose, to provide 
+```html
+  <script type="text/template" id="edit-user-template">
+    <form class="edit-user-form">
+      <legend><%= user ? 'Update' : 'Create' %> User</legend>
+      <label>First Name</label>
+      <input type="text" name="firstname" value="<%= user ? user.get('firstname') : '' %>"/>
+      <label>Last Name</label>
+      <input type="text" name="lastname" value="<%= user ? user.get('lastname') : '' %>"/>
+      <label>Age</label>
+      <input type="text" name="age" value="<%= user ? user.get('age') : '' %>"/>
+      <hr />
+      <button type="submit" class="btn"><%= user ? 'Update' : 'Create' %></button>
+      <% if(user) { %>
+        <input type="hidden" name="id"  value="<%= user.id %>" />
+        <button class="btn btn-danger delete">Delete</button>
+      <% }; %>
+    </form>
+  </script>
+```
 
+Notice the script block contains HTML as well as other syntax.  The other syntax is JavaScript surrounded by `<%=` and `%>`.  If you want more information about this syntax look at the [template function for underscore](http://underscorejs.org/#template).
+
+The code used to show this template is:
+
+```javascript
+  var template = _.template($('#user-list-template').html(), {users: users.models} );
+  this.$el.html(template);
+```
+
+This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second object is some object that the template will interpolate.
+
+A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use. 
+
+In order to do this we will need a couple new functions.
+
+```javascript
+  function init() {
+    window.JST = {
+      'user-list' : _.template($('#user-list-template').html()).source,
+      'edit-user' : _.template($('#edit-user-template').html()).source
+    };
+  }
+  
+  function createTemplate(name, model) {
+    var template = window.JST[name];
+    var func = eval('[' + template + ']')[0];
+    return func(model);
+  }
+
+  window.onload = init;
+```
+
+The first function `init` will create an object called `JST` and put it on the `window` object.  Notice that the object is built by using a key with the same name as the template and the value will be the pre-compiled template source.
+
+The second function `createTemplate` will replace the call to `_.template` inside of our backbone view.  The new view code will look like this:
+
+```javascript
+  var template = createTemplate('user-list', {users: users.models});
+  this.$el.html(template);
+```
+
+This code is very similar to the actual call to undersocres `template` function differing only in the first argument were we only need to pass the name of the template that we want to load.
+
+Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.  The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
 
 ## Grunt Task for Precompiled Templates
 
 
 ## References
+  - [backbone.js](backbone.js)
+  - [backbonetutorials.com](http://backbonetutorials.com/)
   - [Underscore](underscorejs.org)
