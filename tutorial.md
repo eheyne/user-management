@@ -116,6 +116,58 @@ Your new `package.json` should look like this:
 }
 ```
 
+The next thing that needs to be done is to create a folder called `templates`.
+
+In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste into its own file called `user-list.tpl`.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.
+
+Now the `init` function is not needed so go ahead and remove it. The createTemplate function will change to this:
+
+```javascript
+function createTemplate(templateName, data) {
+  var templatePath = './templates/' + templateName + '.tpl';
+  var templateString = window['JST'][templatePath](data);
+  return templateString;
+}
+```
+
+Now the configuration of the grunt-contrib-jst Grunt plugin needs to be done.
+Create a new file at the root of the project called Gruntfile.js.  Copy the below contents into the file and save.
+
+```javascript
+'use strict';
+
+module.exports = function (grunt) {
+  grunt.initConfig({
+    jst: {
+      compile: {
+        files: {
+          "templates.js": ["./templates/**/*.tpl"]
+        }
+      }
+    }
+  });
+
+  grunt.loadNpmTasks('grunt-contrib-jst');
+};
+```
+
+The section starting with `jst` is the configuration that needs to be customized based on the project. For this project we want to look in the templates folder or any sub-folders for any file with the extension of tpl (`./templates/**/*.tpl`).
+The file that will be generated will be called `template.js` and be placed in the root folder.
+The last addition to the Gruntfile is to add the loadNpmTasks for this plugin: `grunt.loadNpmTasks('grunt-contrib-jst');`. This tells grunt to enable the plugin.
+
+For more details around the contents of the [Gruntfile.js](http://gruntjs.com/getting-started#the-gruntfile) file follow the link.
+
+Now running `grunt jst` in the shell will generate a pre-compiled `template.js` file in the root of the project.
+
+The last change that needs to be made is to include the new `templates.js` file in our index.html file.
+
+```javascript
+<script type="text/javascript" src="templates.js"></script>
+```
+
+Add the above line to the scripts section of the index.html file.
+
+
 ## Convert from Underscore templates to Handlebars
 
 
