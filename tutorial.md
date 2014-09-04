@@ -294,10 +294,10 @@ Now we can run `grunt handlebars` at the command line and have it generate a `te
 
 
 ## References
-  - [backbone.js](backbone.js)
+  - [backbone.js](http://backbonejs.org)
   - [backbonetutorials.com](http://backbonetutorials.com/)
   - [Grunt](http://gruntjs.com)
   - [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst)
   - [Handlebars](http://handlebarsjs.com)
-  - [Node](nodejs.org)
-  - [Underscore](underscorejs.org)
+  - [Node](http://nodejs.org)
+  - [Underscore](http://underscorejs.org)

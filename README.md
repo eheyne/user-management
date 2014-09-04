@@ -10,6 +10,6 @@ No special installation instructions needed to run the basic application.  Just 
 The tutorial for this repo can be found here [tutorial.md](./tutorial.md).
 
 ## References
-  - [backbone.js](http://backbone.js)
+  - [backbone.js](http://backbonejs.org)
   - [backbonetutorials.com](http://backbonetutorials.com/)
 
