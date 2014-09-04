@@ -53,7 +53,6 @@
       });
 
       var UserList = Backbone.View.extend({
-        template: JST['templates/user-list.hbs'],
         el: '.page',
         render: function() {
           var that = this;
@@ -61,7 +60,6 @@
           users.fetch({
             success: function() {
               var template = createTemplate('user-list', {users: users.models});
-              <!-- var template = that.template({users: users.models})); -->
               that.$el.html(template);
             }
           });
@@ -76,13 +74,11 @@
             this.user = new User({id: options.id});
             this.user.fetch({
               success: function(user) {
-                <!-- var template = _.template($('#edit-user-template').html(), {user: user} ); -->
                 var template = createTemplate('edit-user', {user: user});
                 that.$el.html(template);
               }
             });
           } else {
-            <!-- var template = _.template($('#edit-user-template').html(), {user: null} ); -->
             var template = createTemplate('edit-user', {user: null});
             this.$el.html(template);
           }
