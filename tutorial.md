@@ -183,11 +183,121 @@ Note: Opening the index.html file will not work.  It will not be able to find so
 
 ## Convert from Underscore templates to Handlebars
 
+The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
+
+The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `script` folder.
+
+Once the handlebars library is downloaded, it needs to be included in the application.  Add the below line to the list of scripts in `index.html`.
+
+```html
+<script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
+```
+
+The scripts section should now look like this:
+
+```html
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+    <script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
+    <script type="text/javascript" src="scripts/templates.js"></script>
+```
+
+The next thing we need to do is change our templates to use handlebars syntax. This tutorial does not include the specifics of the handlebars syntax.  Look [here](http://handlebarsjs.com) for details about handlebars syntax.
+
+The new `user-list` template should look like this:
+
+```html
+  <a href="#/new" class="btn btn-primary">New User</a>
+  <hr />
+  <table class="table table-striped">
+  <thead>
+    <tr>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Age</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each users}}
+    <tr>
+      <td>{{this.attributes.firstname}}</td>
+      <td>{{this.attributes.lastname}}</td>
+      <td>{{this.attributes.age}}</td>
+      <td><a href="#/edit/{{this.attributes.id}}" class="btn">Edit</a></td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+```
+
+Also it is a convention to name handlebars files using a `.handlebars` or for short `.hbs` extension.  Rename `user-list.tpl` to `user-list.hbs` now.
+
+The `edit-user` template also needs to change.  The new `edit-user` template should look like this:
+
+```html
+<form class="edit-user-form">
+  <legend>{{#if user}}Update{{else}}Create{{/if}} User</legend>
+  <label>First Name</label>
+  <input type="text" name="firstname" value="{{#if user}}{{user.attributes.firstname}}{{/if}}"/>
+  <label>Last Name</label>
+  <input type="text" name="lastname" value="{{#if user}}{{user.attributes.lastname}}{{/if}}"/>
+  <label>Age</label>
+  <input type="text" name="age" value="{{#if user}}{{user.attributes.age}}{{/if}}"/>
+  <hr />
+  <button type="submit" class="btn">{{#if user}}Update{{else}}Create{{/if}}</button>
+  {{#if user}}
+    <input type="hidden" name="id"  value="{{user.id}}" />
+    <button class="btn btn-danger delete">Delete</button>
+  {{/if}}
+</form>
+```
+
+Rename `edit-user.tpl` to `edit-user.hbs` now.
+
+The next step is to pre-compile our handlebars templates so that they can be used in our application.  To do this we need to use a different Grunt plugin.  The plugin [grunt-contrib-handlebars](https://github.com/gruntjs/grunt-contrib-handlebars) is what we need to pre-compile handlebars templates.  Run this command on the command line to un-install and remove grunt-contrib-jst from the `package.json` file.
+
+```shell
+npm uninstall grunt-contrib-jst --save-dev
+```
+
+Now run the following command to install grunt-contrib-handlebars and put it in your `devDependencies` of your `package.json` file.
+
+```shell
+npm install grunt-contrib-handlebars --save-dev
+```
+
+The `devDependencies` section of the new package.json file should look like this:
+
+```javascript
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-handlebars": "~0.8.0"
+  }
+```
+
+Now we have to setup the configuration for our handlebars templates.  To do this we need to modify the `Gruntfile.js` file.  Open this file and remove the section for `jst`.  Now we need to add a section called `handlebars`.  The configuration will be similar to what was there for jst, but now there are `.hbs` files instead of `.tpl` files in our templates folder.  The configuration for handlebars in our Gruntfile.js should now look like this:
+
+```javascript
+    handlebars: {
+      all: {
+        files: {
+          "scripts/templates.js": ["templates/**/*.hbs"]
+        }
+      }
+    }
+```
+
+Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application and ensure that it still works the same as it did before.
+
+
 
 ## References
   - [backbone.js](backbone.js)
   - [backbonetutorials.com](http://backbonetutorials.com/)
   - [Grunt](http://gruntjs.com)
   - [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst)
+  - [Handlebars](http://handlebarsjs.com)
   - [Node](nodejs.org)
   - [Underscore](underscorejs.org)

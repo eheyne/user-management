@@ -1,0 +1,15 @@
+<form class="edit-user-form">
+  <legend>{{#if user}}Update{{else}}Create{{/if}} User</legend>
+  <label>First Name</label>
+  <input type="text" name="firstname" value="{{#if user}}{{user.attributes.firstname}}{{/if}}"/>
+  <label>Last Name</label>
+  <input type="text" name="lastname" value="{{#if user}}{{user.attributes.lastname}}{{/if}}"/>
+  <label>Age</label>
+  <input type="text" name="age" value="{{#if user}}{{user.attributes.age}}{{/if}}"/>
+  <hr />
+  <button type="submit" class="btn">{{#if user}}Update{{else}}Create{{/if}}</button>
+  {{#if user}}
+    <input type="hidden" name="id"  value="{{user.id}}" />
+    <button class="btn btn-danger delete">Delete</button>
+  {{/if}}
+</form>
