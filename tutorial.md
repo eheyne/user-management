@@ -93,7 +93,7 @@ After Node is installed, you can install Grunt globally with the following comma
 npm install -g grunt-cli
 ```
 
-If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now and use `npm` commands to add to it later.
+If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now and use `npm` commands to add to it later.
 
 Grunt allows the use of plugins. a Grunt plugin is a Node package that can be published via NPM. For what we are tring to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
 
@@ -116,11 +116,11 @@ Your new `package.json` should look like this:
 }
 ```
 
-The next thing that needs to be done is to create a folder called `templates`.
+The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of the project step.
 
-In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste into its own file called `user-list.tpl`.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.
+In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste into its own file called `user-list.tpl` and save it to the templates folder.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.
 
-Now the `init` function is not needed so go ahead and remove it. The createTemplate function will change to this:
+Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so go it can be removed. The createTemplate function will still be needed but will now read the templates from a property off of `window` called JST. The JST property will contain key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new createTemplate will change to this:
 
 ```javascript
 function createTemplate(templateName, data) {
@@ -130,7 +130,9 @@ function createTemplate(templateName, data) {
 }
 ```
 
-Now the configuration of the grunt-contrib-jst Grunt plugin needs to be done.
+Notice the first argument to the createTemplate is different. It now requires the path within the template folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
+
+Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
 Create a new file at the root of the project called Gruntfile.js.  Copy the below contents into the file and save.
 
 ```javascript
@@ -141,7 +143,7 @@ module.exports = function (grunt) {
     jst: {
       compile: {
         files: {
-          "templates.js": ["./templates/**/*.tpl"]
+          "scripts/templates.js": ["./templates/**/*.tpl"]
         }
       }
     }
@@ -157,15 +159,26 @@ The last addition to the Gruntfile is to add the loadNpmTasks for this plugin: `
 
 For more details around the contents of the [Gruntfile.js](http://gruntjs.com/getting-started#the-gruntfile) file follow the link.
 
-Now running `grunt jst` in the shell will generate a pre-compiled `template.js` file in the root of the project.
+Now running `grunt jst` in the shell will generate a pre-compiled `template.js` file in the scripts folder of the project.
 
 The last change that needs to be made is to include the new `templates.js` file in our index.html file.
 
-```javascript
-<script type="text/javascript" src="templates.js"></script>
+```html
+<script type="text/javascript" src="scripts/templates.js"></script>
 ```
 
-Add the above line to the scripts section of the index.html file.
+Add the above line to the scripts section of the index.html file. The scripts section will look like this:
+
+```html
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
+    <script type="text/javascript" src="scripts/templates.js"></script>
+```
+
+Now you can open the web application using a local web server to see that the app works as it did before.
+
+Note: Opening the index.html file will not work.  It will not be able to find some of the javascript libraries.
 
 
 ## Convert from Underscore templates to Handlebars
@@ -174,4 +187,7 @@ Add the above line to the scripts section of the index.html file.
 ## References
   - [backbone.js](backbone.js)
   - [backbonetutorials.com](http://backbonetutorials.com/)
+  - [Grunt](http://gruntjs.com)
+  - [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst)
+  - [Node](nodejs.org)
   - [Underscore](underscorejs.org)

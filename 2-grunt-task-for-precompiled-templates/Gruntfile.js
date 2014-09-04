@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     jst: {
       compile: {
         files: {
-          "templates.js": ["./templates/**/*.tpl"]
+          "scripts/templates.js": ["./templates/**/*.tpl"]
         }
       }
     }
