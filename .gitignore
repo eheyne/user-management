@@ -7,7 +7,7 @@
 bower_components/
 dist/
 node_modules/
-./**/scripts/templates.js
+**/scripts/templates.js
 test-reports/
 *.dump
 \#*\#
