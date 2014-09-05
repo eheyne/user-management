@@ -201,7 +201,7 @@ Add the above line to the scripts section of the index.html file. The scripts se
     <script type="text/javascript" src="scripts/templates.js"></script>
 ```
 
-Now you can open the web application using a local web server to see that the app works as it did before.
+Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browser to `localhost:8080` to bring up the application.  See step 1 for an explanation of how to install/use `http-server`.
 
 Note: Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
 
@@ -227,7 +227,7 @@ The scripts section should now look like this:
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    <script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
+    <script type="text/javascript" src="scripts/handlebars.runtime-v2.0.0.js"></script>
     <script type="text/javascript" src="scripts/templates.js"></script>
 ```
 
@@ -317,7 +317,27 @@ Now we have to setup the configuration for our handlebars templates.  To do this
     }
 ```
 
-Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application and ensure that it still works the same as it did before.
+Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
+
+## Convert to CommonJS Style Modules with browserify
+This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
+
+The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS style modules to organize each object in its individual file.  We can do this in none Node.js code using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
+
+```shell
+  npm install browserify --save-dev
+```
+
+After running this command the `package.json` file `devDependencies` property will look like this:
+
+```javascript
+ "devDependencies": {
+    "browserify": "^5.11.1",
+    "grunt": "~0.4.5",
+    "grunt-contrib-handlebars": "~0.8.0"
+  }
+```
+
 
 
 ## References
