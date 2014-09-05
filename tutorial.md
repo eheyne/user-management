@@ -8,14 +8,14 @@
   - [References](#user-content-references)
 
 ## Overview
-This tutorial was put in place to grow a base backbone application to a ready to deploy Single Page Application (SPA).  It starts with a basic backbone.js application with CRUD functionality that uses templates.  It builds on the application built by [Thomas Davis](thomasdav.is) in this [video](https://www.youtube.com/watch?v=FZSjvWtUxYk) and incrementally adds features. There is an `index.html` file at the root of this repo.  It is the finished product from this video.  If this is all new to you, I encourage you to follow along with the video and build the application yourself.  If you already have some basic backbone.js understanding and want to move forward with this tutorial then you can use the base application provided here.
+This tutorial was put in place to grow a base backbone application to a ready to deploy Single Page Application (SPA).  It starts with a basic backbone.js application with CRUD functionality that uses templates.  It builds on the application built by [Thomas Davis](http://thomasdav.is) in this [video](https://www.youtube.com/watch?v=FZSjvWtUxYk) and incrementally adds features. There is an `index.html` file at the root of this repo.  It is the finished product from this video.  If this is all new to you, I encourage you to follow along with the video and build the application yourself.  If you already have some basic backbone.js understanding and want to move forward with this tutorial then you can use the base application provided here.
 
-The process of building up a deployable application includes making the source code maintainable, testing the code, making the end product performant, and minification of the finished product.  A number of JavaScript libraries exist to help achieve these goals. One library, [Grunt](gruntjs.com), exists to aid a developer in building such a product by providing a means for defining and executing tasks.  As you go through each step in the tutorial you will learn about new libraries and what services they provide.  You will also learn how to setup Grunt tasks to make the use of these libraries transparent to other deveopers.  This tutorial is designed so that you can go through each step start to finish or jump to a single step if you are looking for something specific.  Each step in this tutorial is built on the previous step.  The source code is broken down into sub-directories of the form `1-Name of Step`, `2-Name of next step`, etc.  This allows you to see the incremental steps taken to get to the finished product.  It also allows you to compare the source code with the previous steps.
+The process of building up a deployable application includes making the source code maintainable, testing the code, making the end product performant, and minification of the finished product.  A number of JavaScript libraries exist to help achieve these goals. One library, [Grunt](http://gruntjs.com), exists to aid a developer in building such a product by providing a means for defining and executing tasks.  As you go through each step in the tutorial you will learn about new libraries and what services they provide.  You will also learn how to setup Grunt tasks to make the use of these libraries transparent to other developers.  This tutorial is designed so that you can go through each step start to finish or jump to a single step if you are looking for something specific.  Each step in this tutorial is built on the previous step.  The source code is broken down into sub-directories of the form `1-Name of Step`, `2-Name of next step`, etc.  This allows you to see the incremental steps taken to get to the finished product.  It also allows you to compare the source code with the previous steps.
 
 I hope you find this tutorial helps you with your JavaScript product development workflow.
 
 ## Precompiling Underscore Templates
-As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](underscorejs.org). Underscore is a JavaScript library that provides many helpful functions.  One of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
+As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions.  One of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
 
 ```html
   <script type="text/template" id="edit-user-template">
@@ -48,9 +48,9 @@ The code used to show this template is:
 
 This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second argument is some object that the template will interpolate.
 
-A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use. 
+A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use.  You can follow along with this tutorial and modify the `index.html` file in the root folder or you can look at the finished product for this step in the `1-inline-precompiled-templates` folder.
 
-In order to do this we will need a couple new functions.
+In order to do this we will need a couple new functions.  If you are following along, the below code can be dropped into the script tag where the `$.ajaxPrefilter` function can be found.
 
 ```javascript
   function init() {
@@ -78,11 +78,36 @@ The second function `createTemplate` will replace the call to `_.template` insid
   this.$el.html(template);
 ```
 
-This code is very similar to the actual call to undersocres `template` function differing only in the first argument were we only need to pass the name of the template that we want to load.
+This code is very similar to the actual call to underscores `template` function differing only in the first argument where we only need to pass the name of the template that we want to load.  Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.
 
-Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.  The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
+To test our application we will use another `Node.js` module called `http-server` to bring up a local webserver and host our page.  To install this locally use this command:
+
+```shell
+  npm install -g http-server
+```
+
+or
+
+```shell
+  sudo npm install -g http-server
+```
+
+if you are on a Mac and get an `EACCES` error.
+
+Now in the path where the project step is, run the command:
+
+```shell
+http-server
+```
+
+Now bring up a browser and navigate to `localhost:8080`.  You should see the application appear in the browser window.  Going forward this mechanism can be used in each of the project step folders to bring up the application.
+
+
+The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
 
 ## Grunt Task for Precompiled Templates
+This step builds upon what was covered in the [Precompiling Underscore Templates](#user-content-precompiling-underscore-templates) step, so you can copy the contents of the `1-inline-precompiled-templates` folder to some workspace where you can make the below changes.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
+
 To pre-compile templates outside of the application we will use [Grunt](http://gruntjs.com/). Grunt requires [Node](nodejs.org) to be installed.
 
 If you do not already have it, please install [Node](nodejs.org) now.
@@ -93,9 +118,9 @@ After Node is installed, you can install Grunt globally with the following comma
 npm install -g grunt-cli
 ```
 
-If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now and use `npm` commands to add to it later.
+If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now.  Using the `--save` and `--save-dev` options when executing an `npm` command will add content to this file.  This is demonstrated below.
 
-Grunt allows the use of plugins. a Grunt plugin is a Node package that can be published via NPM. For what we are tring to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
+Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are tring to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
 
 Once you are familiar with Grunt and the purpose of the package.json file, then you may install this plugin with this command:
 
@@ -120,7 +145,7 @@ The next thing that needs to be done is to create a folder called `templates`. C
 
 In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste into its own file called `user-list.tpl` and save it to the templates folder.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.
 
-Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so go it can be removed. The createTemplate function will still be needed but will now read the templates from a property off of `window` called JST. The JST property will contain key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new createTemplate will change to this:
+Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so it can be removed as well as the call to it in the `window.onload = init` line.  The createTemplate function will still be needed but will now read the templates from a property off of `window` called JST. The JST property will contain key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new createTemplate will change to this:
 
 ```javascript
 function createTemplate(templateName, data) {
@@ -133,7 +158,7 @@ function createTemplate(templateName, data) {
 Notice the first argument to the createTemplate is different. It now requires the path within the template folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
 
 Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
-Create a new file at the root of the project called Gruntfile.js.  Copy the below contents into the file and save.
+Create a new file at the root of the step 1 project called `Gruntfile.js`.  Copy the below contents into the file and save.
 
 ```javascript
 'use strict';
@@ -178,19 +203,22 @@ Add the above line to the scripts section of the index.html file. The scripts se
 
 Now you can open the web application using a local web server to see that the app works as it did before.
 
-Note: Opening the index.html file will not work.  It will not be able to find some of the javascript libraries.
+Note: Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
 
 
 ## Convert from Underscore templates to Handlebars
+This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
 The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
 
-The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `script` folder.
+The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `scripts` folder.  [Download the file](http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.runtime-v2.0.0.js) now and place it in the `scripts` folder.
+
+__Note:__ The version of handlebars may differ from what is presented here.  Be mindful of this when adding the script tag in the next step.
 
 Once the handlebars library is downloaded, it needs to be included in the application.  Add the below line to the list of scripts in `index.html`.
 
 ```html
-<script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
+<script type="text/javascript" src="scripts/handlebars.runtime-v2.0.0.js"></script>
 ```
 
 The scripts section should now look like this:
@@ -290,7 +318,6 @@ Now we have to setup the configuration for our handlebars templates.  To do this
 ```
 
 Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application and ensure that it still works the same as it did before.
-
 
 
 ## References
