@@ -2,9 +2,10 @@
 
 ## Table of Contents
   - [Overview](#user-content-overview)
-  - [Precompiling Underscore Templates](#user-content-precompiling-underscore-templates)
-  - [Grunt task for Precompiled Templates](#user-content-grunt-task-for-precompiled-templates)
-  - [Convert from Underscore templates to Handlebars](#user-content-convert-from-underscore-templates-to-handlebars)
+  - [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates)
+  - [Step 2: Grunt task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates)
+  - [Step 3: Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars)
+  - [Step 4: Convert to CommonJS Style Modules with browserify](#user-content-step-4-convert-to-commonjs-style-modules-with-browserify)
   - [References](#user-content-references)
 
 ## Overview
@@ -14,8 +15,8 @@ The process of building up a deployable application includes making the source c
 
 I hope you find this tutorial helps you with your JavaScript product development workflow.
 
-## Precompiling Underscore Templates
-As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions.  One of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
+## Step 1: Precompiling Underscore Templates
+As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions, one of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
 
 ```html
   <script type="text/template" id="edit-user-template">
@@ -69,32 +70,34 @@ In order to do this we will need a couple new functions.  If you are following a
   window.onload = init;
 ```
 
-The first function `init` will create an object called `JST` and put it on the `window` object.  Notice that the object is built by using a key with the same name as the template and the value will be the pre-compiled template source.
+The first function `init` will create an object called `JST` and put it on the global, `window` object.  Notice that the object is built by using a key (`'user-list'`) with the same name as the template and the value will be the pre-compiled template source.
 
-The second function `createTemplate` takes the name of the template along with the model.  This function looks into the array, `JST`,  that was created in the `init` function and pulls out the appropriate template function source code that was stored there.  It will then execute the function passing in the model and return the resulting HTML.  A call to this function will replace the call to Underscores template function inside of our backbone view.  The new view code will look like this:
+The second function `createTemplate` takes the name of the template along with the model.  This function looks into the object, `JST`,  that was created in the `init` function and pulls out the appropriate template function source code that was stored there.  It will then execute the function passing in the model and return the resulting HTML.  A call to this function will replace the call to Underscore's template function inside of our backbone view.  The new view code will look like this:
 
 ```javascript
   var template = createTemplate('user-list', {users: users.models});
   this.$el.html(template);
 ```
 
-This code is very similar to the actual call to underscores `template` function differing only in the first argument where we only need to pass the name of the template that we want to load.  Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.
+__Note:__ The example code shows the use of `this`.  Depending on the context of the code you may need to replace `this` with `that`.
 
-To test our application we will use another `Node.js` module called `http-server` to bring up a local webserver and host our page.  To install this locally use this command:
+This code is very similar to the actual call to Underscore's template function differing only in the first argument where we only need to pass the name of the template that we want to load.  Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.
+
+If you have not already done so, replace all occurrences of the call to Underscore's template (`_.template`) with our new createTemplate function.  Be mindful of the use of `this` or `that` in the setting of the html on the DOM object in the corresponding line of code.
+
+To test our application we will use a Node.js module called [http-server](https://www.npmjs.org/package/http-server) to bring up a local webserver and host our page.  To install this locally use this command:
 
 ```shell
   npm install -g http-server
 ```
 
-or
+or if you are on a Mac and get an `EACCES` error.
 
 ```shell
   sudo npm install -g http-server
 ```
 
-if you are on a Mac and get an `EACCES` error.
-
-Now in the path where the project step is, run the command:
+Now in the workspace folder where you changed the code, run the command:
 
 ```shell
 http-server
@@ -105,7 +108,7 @@ Now bring up a browser and navigate to `localhost:8080`.  You should see the app
 
 The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
 
-## Grunt Task for Precompiled Templates
+## Step 2: Grunt Task for Precompiled Templates
 This step builds upon what was covered in the [Precompiling Underscore Templates](#user-content-precompiling-underscore-templates) step, so you can copy the contents of the `1-inline-precompiled-templates` folder to some workspace where you can make the below changes.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
 To pre-compile templates outside of the application we will use [Grunt](http://gruntjs.com/). Grunt requires [Node](nodejs.org) to be installed.
@@ -143,9 +146,9 @@ Your new `package.json` should look like this:
 
 The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of the project step.
 
-In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste into its own file called `user-list.tpl` and save it to the templates folder.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.
+In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  
 
-Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so it can be removed as well as the call to it in the `window.onload = init` line.  The createTemplate function will still be needed but will now read the templates from a property off of `window` called JST. The JST property will contain key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new createTemplate will change to this:
+Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so it can be removed as well as the call to it in the `window.onload = init` line.  The `createTemplate` function will still be needed but will need to change a bit to account for the differences in how the Grunt task is creating the JST property. The JST property will contain an object of key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new `createTemplate` will change to this:
 
 ```javascript
 function createTemplate(templateName, data) {
@@ -158,7 +161,7 @@ function createTemplate(templateName, data) {
 Notice the first argument to the createTemplate is different. It now requires the path within the template folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
 
 Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
-Create a new file at the root of the step 1 project called `Gruntfile.js`.  Copy the below contents into the file and save.
+Create a new file in the root of your  workspace called `Gruntfile.js`.  Copy the below contents into the file and save.
 
 ```javascript
 'use strict';
@@ -179,7 +182,7 @@ module.exports = function (grunt) {
 ```
 
 The section starting with `jst` is the configuration that needs to be customized based on the project. For this project we want to look in the templates folder or any sub-folders for any file with the extension of tpl (`./templates/**/*.tpl`).
-The file that will be generated will be called `template.js` and be placed in the root folder.
+The file that will be generated will be called `template.js` and be placed in the scripts folder.
 The last addition to the Gruntfile is to add the loadNpmTasks for this plugin: `grunt.loadNpmTasks('grunt-contrib-jst');`. This tells grunt to enable the plugin.
 
 For more details around the contents of the [Gruntfile.js](http://gruntjs.com/getting-started#the-gruntfile) file follow the link.
@@ -199,14 +202,16 @@ Add the above line to the scripts section of the index.html file. The scripts se
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
     <script type="text/javascript" src="scripts/templates.js"></script>
+    <script>
+      ...
 ```
 
-Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browser to `localhost:8080` to bring up the application.  See step 1 for an explanation of how to install/use `http-server`.
+Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browse to `localhost:8080` to bring up the application.  See [Step 1: Precompiling Underscore Templates](#user-content-precompiling-underscore-templates) for an explanation of how to install/use `http-server`.
 
-Note: Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
+__Note:__ Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
 
 
-## Convert from Underscore templates to Handlebars
+## Step 3: Convert from Underscore templates to Handlebars
 This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
 The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
@@ -319,7 +324,7 @@ Now we have to setup the configuration for our handlebars templates.  To do this
 
 Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
 
-## Convert to CommonJS Style Modules with browserify
+## Step 4: Convert to CommonJS Style Modules with browserify
 This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
 
 The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS style modules to organize each object in its individual file.  We can do this in none Node.js code using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
