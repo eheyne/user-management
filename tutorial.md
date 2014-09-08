@@ -211,14 +211,14 @@ This step builds upon what was covered in the [Grunt Task for Precompiled Templa
 
 The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
 
-The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `scripts` folder.  [Download the file](http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.runtime-v2.0.0.js) now and place it in the `scripts` folder.
+The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `scripts` folder.  [Download the file](http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.runtime-v1.3.0.js) now and place it in the `scripts` folder.
 
 __Note:__ The version of handlebars may differ from what is presented here.  Be mindful of this when adding the script tag in the next step.
 
 Once the handlebars library is downloaded, it needs to be included in the application.  Add the below line to the list of scripts in `index.html`.
 
 ```html
-<script type="text/javascript" src="scripts/handlebars.runtime-v2.0.0.js"></script>
+<script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
 ```
 
 The scripts section should now look like this:
@@ -227,7 +227,7 @@ The scripts section should now look like this:
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    <script type="text/javascript" src="scripts/handlebars.runtime-v2.0.0.js"></script>
+    <script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
     <script type="text/javascript" src="scripts/templates.js"></script>
 ```
 
@@ -301,7 +301,7 @@ The `devDependencies` section of the new package.json file should look like this
 ```javascript
   "devDependencies": {
     "grunt": "~0.4.5",
-    "grunt-contrib-handlebars": "~0.8.0"
+    "grunt-contrib-handlebars": "~0.8.0",
   }
 ```
 
@@ -325,19 +325,202 @@ This step builds upon what was covered in the [Convert from Underscore templates
 The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS style modules to organize each object in its individual file.  We can do this in none Node.js code using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
 
 ```shell
-  npm install browserify --save-dev
+  npm install -g browserify
 ```
 
-After running this command the `package.json` file `devDependencies` property will look like this:
+or
+
+```shell
+  sudo npm install -g browserify
+```
+
+Too convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into an individual file.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  To do the user management users collection in a module, the  code will look like this:
 
 ```javascript
- "devDependencies": {
-    "browserify": "^5.11.1",
-    "grunt": "~0.4.5",
-    "grunt-contrib-handlebars": "~0.8.0"
-  }
+module.exports = Backbone.Collection.extend({
+  url:  '/users'
+});
 ```
 
+This can be saved to a file called `users.js`.  It would make sense to also organize the modules by type so it is easy to find later.  Since it is a JavaScript file, save it to a new folder called `collections` that is created in the `scripts` folder.  We will do the same for models, views, and routers.  The scripts tree structure will look like this after all modules are created:
+
+```shell
+├── scripts
+│   ├── application.js
+│   ├── collections
+│   │   └── users.js
+│   ├── handlebars.runtime-v1.3.0.js
+│   ├── models
+│   │   └── user.js
+│   ├── routers
+│   │   └── application.js
+│   ├── templates.js
+│   ├── user-management.js
+│   └── views
+│       ├── edit-user.js
+│       └── user-list.js
+```
+
+If this structure does not already exist in your warkspace, create it now.  Here is what each file will look like when each of the modules are created:
+
+The `user.js` model should now look like this:
+
+```javascript
+module.exports = Backbone.Model.extend({
+  urlRoot: '/users'
+});
+```
+
+The `user-list` view is a little more involved.  Start by copying the view to the new file and adding `module.exports = ` in place of `var Users`.  But now it needs to be considered that the view uses the `users` collection.  So the `user-list` view module needs to know about the `users` collection module.  This is where the `require` statement comes in.  We use the `require` statement to tell a module that it is using another module.  The `require` statement takes an argument of the relative path to the module that it is requiring.  Since the view is in the `views` folder and it needs to reference a collection in the `collections` folder, the argument will look like this `'../collections/collection-name'`.  The below statement needs to be added to the top of the `user-list` view module.
+
+```javascript
+var Users = require('../collections/users');
+```
+
+The `user-list.js` file will look like this:
+
+```javascript
+var Users = require('../collections/users');
+
+module.exports = Backbone.View.extend({
+  el: '.page',
+  render: function() {
+    var that = this;
+    var users = new Users();
+    users.fetch({
+      success: function() {
+        var template = createTemplate('user-list', {users: users.models});
+        that.$el.html(template);
+      }
+    });
+  }
+});
+```
+
+There is a similar issue when modularizing the `edit-user` view.  It needs to know about the `user` model.  So once again a `require` statement is needed to make the view aware of the model.  The `edit-user.js` file will look like this:
+
+```javascript
+module.exports = Backbone.View.extend({
+  el: '.page',
+  render: function(options) {
+    var that = this;
+    if (options.id) {
+      this.user = new User({id: options.id});
+      this.user.fetch({
+        success: function(user) {
+          var template = createTemplate('edit-user', {user: user});
+          that.$el.html(template);
+        }
+      });
+    } else {
+      var template = createTemplate('edit-user', {user: null});
+      this.$el.html(template);
+    }
+  },
+  events: {
+    'submit .edit-user-form': 'saveUser',
+    'click .delete': 'deleteUser'
+  },
+  saveUser: function(ev) {
+    var userDetails = $(ev.currentTarget).serializeObject();
+    var user = new User();
+    user.save(userDetails, {
+      success: function(user) {
+        router.navigate('', {trigger: true});
+      }
+    });
+    console.log(userDetails);
+    return false;
+  },
+
+  deleteUser: function(ev) {
+    this.user.destroy({
+      success: function() {
+        router.navigate('', {trigger: true});
+      }
+    });
+    return false;
+  }
+});
+```
+
+Now modularize the main portion of the application into an `application.js` file that sits at the root of the ./scripts folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
+
+```javascript
+  var UserList = require('./scripts/views/user-list');
+  var EditUser = require('/scripts/views/edit-user');
+  var Router = require('/scripts/routers/application');
+```
+
+The complete `application.js` file will look like this:
+
+```javascript
+var UserList = require('./views/user-list');
+var EditUser = require('./views/edit-user');
+var Router = require('./routers/application');
+
+var userList = new UserList();
+var editUser = new EditUser();
+var router = new Router();
+
+router.on('route:home', function() {
+  userList.render();
+});
+router.on('route:editUser', function(id) {
+  editUser.render({id: id});
+});
+Backbone.history.start();
+```
+
+Once all of the modules are in place, we need to bundle up the modules into a single JavaScript file.  This can be achieved by running the following command from the root of the step (./user-management/4-convert-to-use-browserify).
+
+```shell
+browserify ./scripts/application.js -o ./scripts/user-management.js
+```
+
+What this command does is combine all of the modules into one JavaScript file called `user-management.js`.  Once this command is executed successfully it needs to be added to the `index.html` file.  Add the below line to the `index.html` file as the last script included, immediately after the inline script.
+
+```html
+    <script type="text/javascript" src="scripts/user-management.js"></script>
+```
+
+There is one additional change necessary to make in the `index.html` file.  This change is to the two jQuery functions that we currently have: `$.ajaxPrefilter` and `$.fn.serializeObject`.  Lets not make these functions available until jQuery is ready to handle them.  This can be done by wrapping them with a `$(document).ready()` function.
+
+The inline script will now look like this:
+
+```html
+    <script>
+      function createTemplate(templateName, data) {
+        var templatePath = 'templates/' + templateName + '.hbs';
+        var templateString = window['JST'][templatePath](data);
+        return templateString;
+      }
+
+      $(document).ready(function() {
+        $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+          options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
+        });
+
+        $.fn.serializeObject = function() {
+          var o = {};
+          var a = this.serializeArray();
+          $.each(a, function() {
+            if (o[this.name] !== undefined) {
+              if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+              }
+              o[this.name].push(this.value || '');
+            } else {
+              o[this.name] = this.value || '';
+            }
+          });
+          return o;
+        };
+      });
+    </script>
+```
+
+Once all of the above steps are complete, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
 
 
 ## References
