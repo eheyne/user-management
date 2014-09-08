@@ -109,7 +109,7 @@ Now bring up a browser and navigate to `localhost:8080`.  You should see the app
 The source code for this step is located in the folder `1-inline-precompiled-templates`. As stated in the [Overview](#user-content-overview) this tutorial takes small incremental steps to help you better understand what is going on behind the scenes. The next step in the tutorial will show how with `Grunt` we can do this before the application is loaded.
 
 ## Step 2: Grunt Task for Precompiled Templates
-This step builds upon what was covered in the [Precompiling Underscore Templates](#user-content-precompiling-underscore-templates) step, so you can copy the contents of the `1-inline-precompiled-templates` folder to some workspace where you can make the below changes.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
+This step builds upon what was covered in the [Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates) step, so you can copy the contents of the `1-inline-precompiled-templates` folder to some workspace where you can make the below changes.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
 To pre-compile templates outside of the application we will use [Grunt](http://gruntjs.com/). Grunt requires [Node](nodejs.org) to be installed.
 
@@ -144,7 +144,7 @@ Your new `package.json` should look like this:
 }
 ```
 
-The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of the project step.
+The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of your workspace.
 
 In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  
 
@@ -161,7 +161,7 @@ function createTemplate(templateName, data) {
 Notice the first argument to the createTemplate is different. It now requires the path within the template folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
 
 Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
-Create a new file in the root of your  workspace called `Gruntfile.js`.  Copy the below contents into the file and save.
+Create a new file in the root of your workspace called `Gruntfile.js`.  Copy the below contents into the file and save.
 
 ```javascript
 'use strict';
@@ -206,13 +206,13 @@ Add the above line to the scripts section of the index.html file. The scripts se
       ...
 ```
 
-Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browse to `localhost:8080` to bring up the application.  See [Step 1: Precompiling Underscore Templates](#user-content-precompiling-underscore-templates) for an explanation of how to install/use `http-server`.
+Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browse to `localhost:8080` to bring up the application.  See [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates) for an explanation of how to install/use `http-server`.
 
 __Note:__ Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
 
 
 ## Step 3: Convert from Underscore templates to Handlebars
-This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
+This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
 The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
 
@@ -322,10 +322,10 @@ Now we have to setup the configuration for our handlebars templates.  To do this
     }
 ```
 
-Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
+Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates).  Ensure that it still works the same as it did before.
 
 ## Step 4: Convert to CommonJS Style Modules with browserify
-This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
+This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
 
 The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS style modules to organize each object in its individual file.  We can do this in none Node.js code using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
 
@@ -449,7 +449,7 @@ module.exports = Backbone.View.extend({
 });
 ```
 
-Now modularize the main portion of the application into an `application.js` file that sits at the root of the ./scripts folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
+Now modularize the main portion of the application into an `application.js` file that sits at the root of your workspace in the ./scripts folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
 
 ```javascript
   var UserList = require('./scripts/views/user-list');
@@ -477,7 +477,7 @@ router.on('route:editUser', function(id) {
 Backbone.history.start();
 ```
 
-Once all of the modules are in place, we need to bundle up the modules into a single JavaScript file.  This can be achieved by running the following command from the root of the step (./user-management/4-convert-to-use-browserify).
+Once all of the modules are in place, we need to bundle up the modules into a single JavaScript file.  This can be achieved by running the following command from the root of your workspace.
 
 ```shell
 browserify ./scripts/application.js -o ./scripts/user-management.js
