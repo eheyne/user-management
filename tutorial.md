@@ -48,7 +48,7 @@ The code used to show this template is:
 
 This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second argument is some object that the template will interpolate.
 
-A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use.  You can follow along with this tutorial and modify the `index.html` file in the root folder or you can look at the finished product for this step in the `1-inline-precompiled-templates` folder.
+A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use.  You can follow along with this tutorial and modify the `index.html` file in the `workspace` folder off of the root folder or you can look at the finished product for this step in the `1-inline-precompiled-templates` folder.
 
 In order to do this we will need a couple new functions.  If you are following along, the below code can be dropped into the script tag where the `$.ajaxPrefilter` function can be found.
 
@@ -71,7 +71,7 @@ In order to do this we will need a couple new functions.  If you are following a
 
 The first function `init` will create an object called `JST` and put it on the `window` object.  Notice that the object is built by using a key with the same name as the template and the value will be the pre-compiled template source.
 
-The second function `createTemplate` will replace the call to `_.template` inside of our backbone view.  The new view code will look like this:
+The second function `createTemplate` takes the name of the template along with the model.  This function looks into the array, `JST`,  that was created in the `init` function and pulls out the appropriate template function source code that was stored there.  It will then execute the function passing in the model and return the resulting HTML.  A call to this function will replace the call to Underscores template function inside of our backbone view.  The new view code will look like this:
 
 ```javascript
   var template = createTemplate('user-list', {users: users.models});
