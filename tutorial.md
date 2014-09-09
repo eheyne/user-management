@@ -19,7 +19,7 @@ I hope you find this tutorial helps you with your JavaScript product development
 
 ### Review of Backbone and Underscore
 
-As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions, one of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
+As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions, one of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `<script>` tag.  
 
 ```html
   <script type="text/template" id="edit-user-template">
@@ -152,7 +152,7 @@ Your new `package.json` should look like this:
 
 The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of your workspace.
 
-In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.  Below is what you should have in the `user-list.tpl` file.
+In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `<script>` tag as the template file that you created is no longer a script embedded in the HTML.  Below is what you should have in the `user-list.tpl` file.
 
 ```html
 <a href="#/new" class="btn btn-primary">New User</a>
@@ -224,7 +224,7 @@ Now running `grunt jst` in the shell will generate a pre-compiled `template.js` 
 The last change that needs to be made is to include the new `templates.js` file in our index.html file.
 
 ```html
-<script type="text/javascript" src="scripts/templates.js"></script>
+<script src="scripts/templates.js"></script>
 ```
 
 Add the above line to the scripts section of the index.html file. The scripts section will look like this:
@@ -233,7 +233,7 @@ Add the above line to the scripts section of the index.html file. The scripts se
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    <script type="text/javascript" src="scripts/templates.js"></script>
+    <script src="scripts/templates.js"></script>
     <script>
       ...
 ```
@@ -246,7 +246,7 @@ __Note:__ Opening the index.html file will not work.  It will not be able to fin
 ## Step 3: Convert from Underscore templates to Handlebars
 This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
-The next step in our process is to swtich to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
+The next step in our process is to switch to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
 
 The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `scripts` folder.  [Download the file](http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.runtime-v1.3.0.js) now and place it in the `scripts` folder.
 
@@ -255,7 +255,7 @@ __Note:__ The version of handlebars may differ from what is presented here.  Be 
 Once the handlebars library is downloaded, it needs to be included in the application.  Add the below line to the list of scripts in `index.html`.
 
 ```html
-<script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
+<script src="scripts/handlebars.runtime-v1.3.0.js"></script>
 ```
 
 The scripts section should now look like this:
@@ -264,8 +264,8 @@ The scripts section should now look like this:
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    <script type="text/javascript" src="scripts/handlebars.runtime-v1.3.0.js"></script>
-    <script type="text/javascript" src="scripts/templates.js"></script>
+    <script src="scripts/handlebars.runtime-v1.3.0.js"></script>
+    <script src="scripts/templates.js"></script>
 ```
 
 The next thing we need to do is change our templates to use handlebars syntax. This tutorial does not include the specifics of the handlebars syntax.  Look [here](http://handlebarsjs.com) for details about handlebars syntax.
@@ -518,7 +518,7 @@ browserify ./scripts/application.js -o ./scripts/user-management.js
 What this command does is combine all of the modules into one JavaScript file called `user-management.js`.  Once this command is executed successfully it needs to be added to the `index.html` file.  Add the below line to the `index.html` file as the last script included, immediately after the inline script.
 
 ```html
-    <script type="text/javascript" src="scripts/user-management.js"></script>
+    <script src="scripts/user-management.js"></script>
 ```
 
 There is one additional change necessary to make in the `index.html` file.  This change is to the two jQuery functions that we currently have: `$.ajaxPrefilter` and `$.fn.serializeObject`.  Lets not make these functions available until jQuery is ready to handle them.  This can be done by wrapping them with a `$(document).ready()` function.
