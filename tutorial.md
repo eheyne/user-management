@@ -16,6 +16,9 @@ The process of building up a deployable application includes making the source c
 I hope you find this tutorial helps you with your JavaScript product development workflow.
 
 ## Step 1: Precompiling Underscore Templates
+
+### Review of Backbone and Underscore
+
 As mentioned in the [Overview](#user-content-overview) the base application uses backbone and one of the dependencies of Backbone is [Underscore](http://underscorejs.org). Underscore is a JavaScript library that provides many helpful functions, one of which is a function called `template` that will precompile an HTML template into a JavaScript function, which can be used for plugging in dynamic content to the markup. This application defines templates inside of a `script` tag.  
 
 ```html
@@ -49,6 +52,8 @@ The code used to show this template is:
 
 This code calls the underscore template function with two arguments, the first being the HTML found in the specified script tag.  The second argument is some object that the template will interpolate.
 
+### Pre-compilation
+
 A common practice today in building SPAs is to remove the processing of templates from being real time to pre-compiling them before they are needed.  This step in the tutorial we will take that compilation and move it into an application load event so that when the template is requested it is already compiled and ready for use.  You can follow along with this tutorial and modify the `index.html` file in the `workspace` folder off of the root folder or you can look at the finished product for this step in the `1-inline-precompiled-templates` folder.
 
 In order to do this we will need a couple new functions.  If you are following along, the below code can be dropped into the script tag where the `$.ajaxPrefilter` function can be found.
@@ -56,15 +61,14 @@ In order to do this we will need a couple new functions.  If you are following a
 ```javascript
   function init() {
     window.JST = {
-      'user-list' : _.template($('#user-list-template').html()).source,
-      'edit-user' : _.template($('#edit-user-template').html()).source
+      'user-list' : _.template($('#user-list-template').html()),
+      'edit-user' : _.template($('#edit-user-template').html())
     };
   }
   
   function createTemplate(name, model) {
-    var template = window.JST[name];
-    var func = eval('[' + template + ']')[0];
-    return func(model);
+    var templateFunc = window.JST[name];
+    return templateFunc(model);
   }
 
   window.onload = init;
@@ -79,11 +83,13 @@ The second function `createTemplate` takes the name of the template along with t
   this.$el.html(template);
 ```
 
-__Note:__ The example code shows the use of `this`.  Depending on the context of the code you may need to replace `this` with `that`.
+This code is very similar to the actual call to Underscore's template function differing only in the first argument where we only need to pass the name of the template that we want to load.  Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them in the browser before the application starts.  In the next step we will talk about how we can pre-compile before running the application in a browser.
 
-This code is very similar to the actual call to Underscore's template function differing only in the first argument where we only need to pass the name of the template that we want to load.  Also notice after the two functions definitions we call `window.onload = init;` so that on the window load event we call our new init function. This is a way to pre-compile the templates before they are needed in the views. This however does still compile them when the application is run.  It just does it on application start rather than while navigating through the app.
+If you have not already done so, replace all occurrences of the call to Underscore's template (`_.template`) with our new `createTemplate` function.
 
-If you have not already done so, replace all occurrences of the call to Underscore's template (`_.template`) with our new createTemplate function.  Be mindful of the use of `this` or `that` in the setting of the html on the DOM object in the corresponding line of code.
+__Note:__ Be mindful of the use of `this` or `that` in the setting of the html on the DOM object in the corresponding line of code.
+
+### Setup Application for Testing
 
 To test our application we will use a Node.js module called [http-server](https://www.npmjs.org/package/http-server) to bring up a local webserver and host our page.  To install this locally use this command:
 
@@ -97,7 +103,7 @@ or if you are on a Mac and get an `EACCES` error.
   sudo npm install -g http-server
 ```
 
-Now in the workspace folder where you changed the code, run the command:
+Now in the `workspace` folder where you changed the code, run the command:
 
 ```shell
 http-server
@@ -115,17 +121,17 @@ To pre-compile templates outside of the application we will use [Grunt](http://g
 
 If you do not already have it, please install [Node](nodejs.org) now.
 
-After Node is installed, you can install Grunt globally with the following command:
+After Node is installed, you can install the [Grunt client](https://github.com/gruntjs/grunt-cli) globally with the following command:
 
 ```shell
 npm install -g grunt-cli
 ```
 
-If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file and put an empty JavaScript object in it `{  }` for now.  Using the `--save` and `--save-dev` options when executing an `npm` command will add content to this file.  This is demonstrated below.
+If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file in the root of your workspace and put an empty JavaScript object in it `{  }` for now.  Using the `--save` and `--save-dev` options when executing an `npm` command will add content to this file.  This is demonstrated below.
 
-Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are tring to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
+Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are string to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
 
-Once you are familiar with Grunt and the purpose of the package.json file, then you may install this plugin with this command:
+Once you are familiar with Grunt and the purpose of the `package.json` file, then you may install this plugin with this command:
 
 ```shell
 npm install grunt-contrib-jst --save-dev
@@ -146,7 +152,33 @@ Your new `package.json` should look like this:
 
 The next thing that needs to be done is to create a folder called `templates`. Create this folder at the root of your workspace.
 
-In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.  Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  
+In the `index.html`, cut the `user-list-template` out of the `index.html` file and paste it into its own file called `user-list.tpl` and save it to the templates folder.  When doing this do not include the `script` tag as the template file that you created is no longer a script embedded in the HTML.  Below is what you should have in the `user-list.tpl` file.
+
+```html
+<a href="#/new" class="btn btn-primary">New User</a>
+<hr />
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Age</th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  <% _.each(users, function(user) { %>
+    <tr>
+      <td><%= user.get('firstname') %></td>
+      <td><%= user.get('lastname') %></td>
+      <td><%= user.get('age') %></td>
+      <td><a href="#/edit/<%= user.id %>" class="btn">Edit</a></td>
+    </tr>
+  <% }); %>
+</tbody>
+```
+
+Do the same thing for the `edit-user-template` and call it `edit-user.tpl`.  
 
 Since we will be pre-compiling the templates before running the application, the `init` function is no longer needed so it can be removed as well as the call to it in the `window.onload = init` line.  The `createTemplate` function will still be needed but will need to change a bit to account for the differences in how the Grunt task is creating the JST property. The JST property will contain an object of key/value pairs where the key is the path to the template file and the value will be the pre-compiled template function. The new `createTemplate` will change to this:
 
@@ -158,7 +190,7 @@ function createTemplate(templateName, data) {
 }
 ```
 
-Notice the first argument to the createTemplate is different. It now requires the path within the template folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
+Notice the first argument to the `createTemplate` is different. It now requires the path within the `template` folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
 
 Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
 Create a new file in the root of your workspace called `Gruntfile.js`.  Copy the below contents into the file and save.

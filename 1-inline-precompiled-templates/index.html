@@ -62,15 +62,14 @@
     <script>
       function init() {
         window.JST = {
-          'user-list' : _.template($('#user-list-template').html()).source,
-          'edit-user' : _.template($('#edit-user-template').html()).source
+          'user-list' : _.template($('#user-list-template').html()),
+          'edit-user' : _.template($('#edit-user-template').html())
         };
       }
       
       function createTemplate(name, model) {
-        var template = window.JST[name];
-        var func = eval('[' + template + ']')[0];
-        return func(model);
+        var templateFunc = window.JST[name];
+        return templateFunc(model);
       }
 
       window.onload = init;
