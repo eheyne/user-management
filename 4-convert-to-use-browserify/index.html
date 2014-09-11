@@ -15,7 +15,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
-    <script src="scripts/handlebars.runtime-v1.3.0.js"></script>
+    <script src="scripts/vendor/handlebars.runtime-v1.3.0.js"></script>
     <script src="scripts/templates.js"></script>
 
     <script>
@@ -25,27 +25,25 @@
         return templateString;
       }
 
-      $(document).ready(function() {
-        $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-          options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
-        });
-
-        $.fn.serializeObject = function() {
-          var o = {};
-          var a = this.serializeArray();
-          $.each(a, function() {
-            if (o[this.name] !== undefined) {
-              if (!o[this.name].push) {
-                o[this.name] = [o[this.name]];
-              }
-              o[this.name].push(this.value || '');
-            } else {
-              o[this.name] = this.value || '';
-            }
-          });
-          return o;
-        };
+      $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+        options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
       });
+
+      $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+          if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+              o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+          } else {
+            o[this.name] = this.value || '';
+          }
+        });
+        return o;
+      };
     </script>
 
     <script type="text/javascript" src="scripts/user-management.js"></script>

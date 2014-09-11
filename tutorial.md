@@ -389,9 +389,44 @@ or
   sudo npm install -g browserify
 ```
 
+### Application Folder Structure
+
+To convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into seperate files.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  Since these modules are JavaScript, it makes sense to put these files into the already existing `scripts` folder.  To keep the `scripts` folder from growing over time, we can break out the files by type and put them in corresponding sub-folders.  The sub-folders that we can create to correspond to Backbone.js objects are: collections, models, routers and views.  We also already have a handlebars file in the scripts folder.  It makes sense to add another sub-folder to contain vendor libraries, called vendor.  The folder structure should look similar to this:
+
+```shell
+├── scripts
+│   ├── collections
+│   ├── models
+│   ├── routers
+│   ├── vendor
+│   └── views
+```
+
+If this structure does not already exist in your workspace, create it now.
+
+The next section describes how to create the modules and where to put each module.  The scripts tree structure will look like this after all modules are created:
+
+```shell
+├── scripts
+│   ├── application.js
+│   ├── collections
+│   │   └── users.js
+│   ├── models
+│   │   └── user.js
+│   ├── routers
+│   │   └── application.js
+│   ├── templates.js
+│   ├── user-management.js
+│   ├── vendor
+│   │   └── handlebars.runtime-v1.3.0.js
+│   └── views
+│       ├── edit-user.js
+│       └── user-list.js
+```
+
 ### Application Changes for Browserify
 
-To convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into seperate files.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  To do the user management users collection in a module, the  code will look like this:
+Once the project structure is in place, we can move forward with creating our modules.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  Let's start by converting the `users` collection to a module.  The code will look like this:
 
 ```javascript
 module.exports = Backbone.Collection.extend({
@@ -399,28 +434,9 @@ module.exports = Backbone.Collection.extend({
 });
 ```
 
-This can be saved to a file called `users.js`.  It would make sense to also organize the modules by type so it is easy to find later.  Since it is a JavaScript file, save it to a new folder called `collections` that is created in the `scripts` folder.  We will do the same for models, views, and routers.  The scripts tree structure will look like this after all modules are created:
+This can be saved to a file called `users.js`.  Since it is a Backbone collection, save it to the folder called `collections` that you created above under the `scripts` folder.  We will do the same for models, views, and routers.
 
-```shell
-├── scripts
-│   ├── application.js
-│   ├── collections
-│   │   └── users.js
-│   ├── handlebars.runtime-v1.3.0.js
-│   ├── models
-│   │   └── user.js
-│   ├── routers
-│   │   └── application.js
-│   ├── templates.js
-│   ├── user-management.js
-│   └── views
-│       ├── edit-user.js
-│       └── user-list.js
-```
-
-If this structure does not already exist in your warkspace, create it now.  Here is what each file will look like when each of the modules are created:
-
-The `user.js` model should now look like this:
+Converting the `user` model to use modules, we create the `user.js` file in the `models` folder.  The code should look like this:
 
 ```javascript
 module.exports = Backbone.Model.extend({
@@ -428,7 +444,7 @@ module.exports = Backbone.Model.extend({
 });
 ```
 
-The `user-list` view is a little more involved.  Start by copying the view to the new file and adding `module.exports = ` in place of `var Users`.  But now it needs to be considered that the view uses the `users` collection.  So the `user-list` view module needs to know about the `users` collection module.  This is where the `require` statement comes in.  We use the `require` statement to tell a module that it is using another module.  The `require` statement takes an argument of the relative path to the module that it is requiring.  Since the view is in the `views` folder and it needs to reference a collection in the `collections` folder, the argument will look like this `'../collections/collection-name'`.  The below statement needs to be added to the top of the `user-list` view module.
+The `user-list` view is a little more involved.  Start by copying the view to a new file called `user-list.js` and putting it in the `views` sub-folder.  Next modify the code by adding `module.exports = ` in place of `var Users`.  But now it needs to be considered that the view uses the `users` collection.  So the `user-list` view module needs to know about the `users` collection module.  This is where the `require` statement comes in.  We use the `require` statement to tell a module that it is using another module.  The `require` statement takes an argument of the relative path to the module that it is requiring.  Since the view is in the `views` folder and it needs to reference a collection in the `collections` folder, the argument will look like this `'../collections/collection-name'`.  The below statement needs to be added to the top of the `user-list` view module.
 
 ```javascript
 var Users = require('../collections/users');
@@ -454,9 +470,11 @@ module.exports = Backbone.View.extend({
 });
 ```
 
-There is a similar issue when modularizing the `edit-user` view.  It needs to know about the `user` model.  So once again a `require` statement is needed to make the view aware of the model.  The `edit-user.js` file will look like this:
+There is a similar issue when modularizing the `edit-user` view.  It needs to know about the `user` model.  So once again a `require` statement is needed to make the view aware of the model.  The `edit-user.js` file, saved to the `views` folder, will look like this:
 
 ```javascript
+var User = require('../models/user');
+
 module.exports = Backbone.View.extend({
   el: '.page',
   render: function(options) {
@@ -483,7 +501,7 @@ module.exports = Backbone.View.extend({
     var user = new User();
     user.save(userDetails, {
       success: function(user) {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     console.log(userDetails);
@@ -493,10 +511,24 @@ module.exports = Backbone.View.extend({
   deleteUser: function(ev) {
     this.user.destroy({
       success: function() {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     return false;
+  }
+});
+```
+
+There is one additional change that you may have noticed in this file.  The change is to the `router.navigate` statements.  This appears twice in this module where we are navigating to a different route.  Since `router` will no longer be a global object, we need to add the `App.` in front of it.  As will be explained below, the `router` object will be a part of a new object, `Application` that we will create and make global.
+
+Now cut out the `router` from the `index.html` and put it into a file called `application.js`.  Save this file to `./scripts/routers`.  The code for this module should look like this:
+
+```javascript
+module.exports = Backbone.Router.extend({
+  routes: {
+    '': 'home',
+    'new': 'editUser',
+    'edit/:ed': 'editUser'
   }
 });
 ```
@@ -509,6 +541,30 @@ Now modularize the main portion of the application into an `application.js` file
   var Router = require('./scripts/routers/application');
 ```
 
+We also will be wrapping the logic into a constructor function so that we can create an object of type `Application` to be put on the global `window` object.  The function will look like this:
+
+```javascript
+function Application() {
+  var userList = new UserList();
+  var editUser = new EditUser();
+  this.router = new Router();
+
+  this.router.on('route:home', function() {
+    userList.render();
+  });
+  this.router.on('route:editUser', function(id) {
+    editUser.render({id: id});
+  });
+  Backbone.history.start();
+}
+```
+
+The call to create this function immediately follows the function definition.
+
+```javascript
+window.App = new Application();
+```
+
 The complete `application.js` file will look like this:
 
 ```javascript
@@ -516,17 +572,21 @@ var UserList = require('./views/user-list');
 var EditUser = require('./views/edit-user');
 var Router = require('./routers/application');
 
-var userList = new UserList();
-var editUser = new EditUser();
-var router = new Router();
+function Application() {
+  var userList = new UserList();
+  var editUser = new EditUser();
+  this.router = new Router();
 
-router.on('route:home', function() {
-  userList.render();
-});
-router.on('route:editUser', function(id) {
-  editUser.render({id: id});
-});
-Backbone.history.start();
+  this.router.on('route:home', function() {
+    userList.render();
+  });
+  this.router.on('route:editUser', function(id) {
+    editUser.render({id: id});
+  });
+  Backbone.history.start();
+}
+
+window.App = new Application();
 ```
 
 ### Running Browserify Command
@@ -543,42 +603,12 @@ What this command does is combine all of the modules into one JavaScript file ca
     <script src="scripts/user-management.js"></script>
 ```
 
-There is one additional change necessary to make in the `index.html` file.  This change is to the two jQuery functions that we currently have: `$.ajaxPrefilter` and `$.fn.serializeObject`.  We need to ensure that `jQuery` is ready to handle these functions before we try to define them.  This can be done by wrapping them with a `$(document).ready()` function.
-
-The inline script will now look like this:
+There is one additional change necessary to make in the `index.html` file.  This change is to the script tag that is including handlebars.  Since we moved the file to the `vendor` sub-folder, we need to change the reference to it.  The new script reference to handlebars should now look like this:
 
 ```html
-    <script>
-      function createTemplate(templateName, data) {
-        var templatePath = 'templates/' + templateName + '.hbs';
-        var templateString = window['JST'][templatePath](data);
-        return templateString;
-      }
-
-      $(document).ready(function() {
-        $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-          options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
-        });
-
-        $.fn.serializeObject = function() {
-          var o = {};
-          var a = this.serializeArray();
-          $.each(a, function() {
-            if (o[this.name] !== undefined) {
-              if (!o[this.name].push) {
-                o[this.name] = [o[this.name]];
-              }
-              o[this.name].push(this.value || '');
-            } else {
-              o[this.name] = this.value || '';
-            }
-          });
-          return o;
-        };
-      });
-    </script>
+    <script src="scripts/vendor/handlebars.runtime-v1.3.0.js"></script>
 ```
-
+ 
 ### Setup Application for Testing Browserify
 
 Once all of the above steps are complete, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.

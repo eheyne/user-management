@@ -3,51 +3,33 @@ var UserList = require('./views/user-list');
 var EditUser = require('./views/edit-user');
 var Router = require('./routers/application');
 
-function createTemplate(templateName, data) {
-  var templatePath = 'templates/' + templateName + '.hbs';
-  var templateString = window['JST'][templatePath](data);
-  return templateString;
+function Application() {
+  var userList = new UserList();
+  var editUser = new EditUser();
+  this.router = new Router();
+
+  this.router.on('route:home', function() {
+    userList.render();
+  });
+  this.router.on('route:editUser', function(id) {
+    editUser.render({id: id});
+  });
+  Backbone.history.start();
 }
 
-$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-  options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
-});
+window.App = new Application();
 
-$.fn.serializeObject = function() {
-  var o = {};
-  var a = this.serializeArray();
-  $.each(a, function() {
-    if (o[this.name] !== undefined) {
-      if (!o[this.name].push) {
-        o[this.name] = [o[this.name]];
-      }
-      o[this.name].push(this.value || '');
-    } else {
-      o[this.name] = this.value || '';
-    }
-  });
-  return o;
-};
-
-var userList = new UserList();
-var editUser = new EditUser();
-var router = new Router();
-
-router.on('route:home', function() {
-  userList.render();
-});
-router.on('route:editUser', function(id) {
-  editUser.render({id: id});
-});
-Backbone.history.start();
-
-
-},{"./routers/application":3,"./views/edit-user":4,"./views/user-list":5}],2:[function(require,module,exports){
+},{"./routers/application":4,"./views/edit-user":5,"./views/user-list":6}],2:[function(require,module,exports){
 module.exports = Backbone.Collection.extend({
     url:  '/users'
 });
 
 },{}],3:[function(require,module,exports){
+module.exports = Backbone.Model.extend({
+  urlRoot: '/users'
+});
+
+},{}],4:[function(require,module,exports){
 module.exports = Backbone.Router.extend({
   routes: {
     '': 'home',
@@ -55,10 +37,13 @@ module.exports = Backbone.Router.extend({
     'edit/:ed': 'editUser'
   }
 });
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
+var User = require('../models/user');
+
 module.exports = Backbone.View.extend({
   el: '.page',
   render: function(options) {
+    debugger;
     var that = this;
     if (options.id) {
       this.user = new User({id: options.id});
@@ -82,7 +67,7 @@ module.exports = Backbone.View.extend({
     var user = new User();
     user.save(userDetails, {
       success: function(user) {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     console.log(userDetails);
@@ -92,13 +77,14 @@ module.exports = Backbone.View.extend({
   deleteUser: function(ev) {
     this.user.destroy({
       success: function() {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     return false;
   }
 });
-},{}],5:[function(require,module,exports){
+
+},{"../models/user":3}],6:[function(require,module,exports){
 var Users = require('../collections/users');
 
 module.exports = Backbone.View.extend({

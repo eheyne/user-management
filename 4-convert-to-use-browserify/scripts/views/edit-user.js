@@ -1,3 +1,5 @@
+var User = require('../models/user');
+
 module.exports = Backbone.View.extend({
   el: '.page',
   render: function(options) {
@@ -24,7 +26,7 @@ module.exports = Backbone.View.extend({
     var user = new User();
     user.save(userDetails, {
       success: function(user) {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     console.log(userDetails);
@@ -34,7 +36,7 @@ module.exports = Backbone.View.extend({
   deleteUser: function(ev) {
     this.user.destroy({
       success: function() {
-        router.navigate('', {trigger: true});
+        App.router.navigate('', {trigger: true});
       }
     });
     return false;
