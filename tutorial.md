@@ -5,7 +5,7 @@
   - [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates)
   - [Step 2: Grunt task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates)
   - [Step 3: Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars)
-  - [Step 4: Convert to CommonJS Style Modules with browserify](#user-content-step-4-convert-to-commonjs-style-modules-with-browserify)
+  - [Step 4: Convert to CommonJS Modules with browserify](#user-content-step-4-convert-to-commonjs--modules-with-browserify)
   - [References](#user-content-references)
 
 ## Overview
@@ -244,7 +244,7 @@ __Note:__ Opening the index.html file will not work.  It will not be able to fin
 
 
 ## Step 3: Convert from Underscore templates to Handlebars
-This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
+This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `3-convert-from-underscore-to-handlebars` folder.
 
 The next step in our process is to switch to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
 
@@ -342,7 +342,7 @@ The `devDependencies` section of the new package.json file should look like this
   }
 ```
 
-Now we have to setup the configuration for our handlebars templates.  To do this we need to modify the `Gruntfile.js` file.  Open this file and remove the section for `jst`.  Now we need to add a section called `handlebars`.  The configuration will be similar to what was there for jst, but now there are `.hbs` files instead of `.tpl` files in our templates folder.  The configuration for handlebars in our Gruntfile.js should now look like this:
+Now we have to setup the configuration for our handlebars templates.  To do this we need to modify the `Gruntfile.js` file.  Open this file and remove the section for `jst`.  Now we need to add a section called `handlebars`.  The configuration will be similar to what was there for `jst`, but now there are `.hbs` files instead of `.tpl` files in our templates folder.  The configuration for handlebars in our Gruntfile.js should now look like this:
 
 ```javascript
     handlebars: {
@@ -356,10 +356,10 @@ Now we have to setup the configuration for our handlebars templates.  To do this
 
 Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates).  Ensure that it still works the same as it did before.
 
-## Step 4: Convert to CommonJS Style Modules with browserify
+## Step 4: Convert to CommonJS Modules with browserify
 This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
 
-The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS style modules to organize each object in its individual file.  We can do this in none Node.js code using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
+The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS modules to organize each object in its individual file.  We can utilize these modules in the browser by using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
 
 ```shell
   npm install -g browserify
@@ -371,7 +371,7 @@ or
   sudo npm install -g browserify
 ```
 
-Too convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into an individual file.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  To do the user management users collection in a module, the  code will look like this:
+To convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into seperate files.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  To do the user management users collection in a module, the  code will look like this:
 
 ```javascript
 module.exports = Backbone.Collection.extend({
@@ -481,12 +481,12 @@ module.exports = Backbone.View.extend({
 });
 ```
 
-Now modularize the main portion of the application into an `application.js` file that sits at the root of your workspace in the ./scripts folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
+Now modularize the main portion of the application into an `application.js` file that is located at the root of your workspace in the `scripts` folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
 
 ```javascript
   var UserList = require('./scripts/views/user-list');
-  var EditUser = require('/scripts/views/edit-user');
-  var Router = require('/scripts/routers/application');
+  var EditUser = require('./scripts/views/edit-user');
+  var Router = require('./scripts/routers/application');
 ```
 
 The complete `application.js` file will look like this:
@@ -521,7 +521,7 @@ What this command does is combine all of the modules into one JavaScript file ca
     <script src="scripts/user-management.js"></script>
 ```
 
-There is one additional change necessary to make in the `index.html` file.  This change is to the two jQuery functions that we currently have: `$.ajaxPrefilter` and `$.fn.serializeObject`.  Lets not make these functions available until jQuery is ready to handle them.  This can be done by wrapping them with a `$(document).ready()` function.
+There is one additional change necessary to make in the `index.html` file.  This change is to the two jQuery functions that we currently have: `$.ajaxPrefilter` and `$.fn.serializeObject`.  We need to ensure that `jQuery` is ready to handle these functions before we try to define them.  This can be done by wrapping them with a `$(document).ready()` function.
 
 The inline script will now look like this:
 
