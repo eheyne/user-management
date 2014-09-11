@@ -5,7 +5,7 @@
   - [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates)
   - [Step 2: Grunt task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates)
   - [Step 3: Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars)
-  - [Step 4: Convert to CommonJS Modules with browserify](#user-content-step-4-convert-to-commonjs--modules-with-browserify)
+  - [Step 4: Convert to CommonJS Modules with browserify](#user-content-step-4-convert-to-commonjs-modules-with-browserify)
   - [References](#user-content-references)
 
 ## Overview
@@ -89,7 +89,7 @@ If you have not already done so, replace all occurrences of the call to Undersco
 
 __Note:__ Be mindful of the use of `this` or `that` in the setting of the html on the DOM object in the corresponding line of code.
 
-### Setup Application for Testing
+### Setup Application for Testing Template Pre-compilation
 
 To test our application we will use a Node.js module called [http-server](https://www.npmjs.org/package/http-server) to bring up a local webserver and host our page.  To install this locally use this command:
 
@@ -117,6 +117,8 @@ The source code for this step is located in the folder `1-inline-precompiled-tem
 ## Step 2: Grunt Task for Precompiled Templates
 This step builds upon what was covered in the [Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates) step, so you can copy the contents of the `1-inline-precompiled-templates` folder to some workspace where you can make the below changes.  The completed code for this step can be found in the `2-grunt-taks-for-precompiled-templates` folder.
 
+### Node/Grunt Background and Setup
+
 To pre-compile templates outside of the application we will use [Grunt](http://gruntjs.com/). Grunt requires [Node](nodejs.org) to be installed.
 
 If you do not already have it, please install [Node](nodejs.org) now.
@@ -130,6 +132,8 @@ npm install -g grunt-cli
 If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file in the root of your workspace and put an empty JavaScript object in it `{  }` for now.  Using the `--save` and `--save-dev` options when executing an `npm` command will add content to this file.  This is demonstrated below.
 
 Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are string to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
+
+### Application Changes for Grunt Task 
 
 Once you are familiar with Grunt and the purpose of the `package.json` file, then you may install this plugin with this command:
 
@@ -192,6 +196,8 @@ function createTemplate(templateName, data) {
 
 Notice the first argument to the `createTemplate` is different. It now requires the path within the `template` folder of where the `tpl` file is, instead of the name of the script tag. The second argument, the model, remains the same.
 
+### Grunt Task Configuration
+
 Now the configuration of the grunt-contrib-jst Grunt plugin needs to be setup.
 Create a new file in the root of your workspace called `Gruntfile.js`.  Copy the below contents into the file and save.
 
@@ -238,6 +244,8 @@ Add the above line to the scripts section of the index.html file. The scripts se
       ...
 ```
 
+### Setup Application for Testing Pre-compilation Using Grunt
+
 Now you can open the web application using a local web server to see that the app works as it did before.  Use `http-server` and browse to `localhost:8080` to bring up the application.  See [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates) for an explanation of how to install/use `http-server`.
 
 __Note:__ Opening the index.html file will not work.  It will not be able to find some of the JavaScript libraries.
@@ -246,7 +254,11 @@ __Note:__ Opening the index.html file will not work.  It will not be able to fin
 ## Step 3: Convert from Underscore templates to Handlebars
 This step builds upon what was covered in the [Grunt Task for Precompiled Templates](#user-content-step-2-grunt-task-for-precompiled-templates) step, so you can build upon the contents of the `1-inline-precompiled-templates` folder.  The completed code for this step can be found in the `3-convert-from-underscore-to-handlebars` folder.
 
+### Handlebars Introduction
+
 The next step in our process is to switch to a different templating library. While underscore templating was sufficient for this smaller demo application, enterprise applications may find the need to do more complicated expressions in templates.  [Handlebars](http://handlebarsjs.com) provides the ability to create custom helper methods to do more complicated expressions.  It also provides the ability to change the context that is supplied to a template.  For more details visit [Handlebars](http://handlebarsjs.com).
+
+### Application Changes for Handlebars
 
 The first step to converting to handlebars is to pull in the handlebars library into our application.  We can do this a few different ways.  We can continue to use the method that Thomas Davis used where he pointed to [cdnjs](http://cdnjs.com) to provide the handlebars library by including `//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0-alpha.4/handlebars.min.js` in the list of scripts in the index.html.  An enterprise application may want to download and maintain its own library.  For this tutorial the handlebars library was downloaded and placed in the project `scripts` folder.  [Download the file](http://builds.handlebarsjs.com.s3.amazonaws.com/handlebars.runtime-v1.3.0.js) now and place it in the `scripts` folder.
 
@@ -321,6 +333,8 @@ The `edit-user` template also needs to change.  The new `edit-user` template sho
 
 Rename `edit-user.tpl` to `edit-user.hbs` now.
 
+### Grunt Task Configuration for Handlebars
+
 The next step is to pre-compile our handlebars templates so that they can be used in our application.  To do this we need to use a different Grunt plugin.  The plugin [grunt-contrib-handlebars](https://github.com/gruntjs/grunt-contrib-handlebars) is what we need to pre-compile handlebars templates.  Run this command on the command line to un-install and remove grunt-contrib-jst from the `package.json` file.
 
 ```shell
@@ -354,10 +368,14 @@ Now we have to setup the configuration for our handlebars templates.  To do this
     }
 ```
 
+### Setup Application for Testing Handlebars
+
 Now we can run `grunt handlebars` at the command line and have it generate a `templates.js` file in our scripts folder.  Once that completes, test the application using `http-server` and browsing to `localhost:8080` as is described above in [Step 1: Precompiling Underscore Templates](#user-content-step-1-precompiling-underscore-templates).  Ensure that it still works the same as it did before.
 
 ## Step 4: Convert to CommonJS Modules with browserify
 This step builds upon what was covered in the [Convert from Underscore templates to Handlebars](#user-content-step-3-convert-from-underscore-templates-to-handlebars) step, so you can build upon the contents of the `3-convert-from-underscore-to-handlebars` folder.  The completed code for this step can be found in the `4-convert-to-use-browserify` folder.
+
+### Browserify Introduction
 
 The current state of the application is not very maintainable or extensible.  All the JavaScript is embedded in the single HTML file and most variables have global window scope.  The application is small now and fairly easy to change, but if features were to be added to this application, it can grow rather quickly and become cumbersome to manage.  So before it gets to that state, it would be nice to make it more maintainable and extensible by modularizing the code.  If this were a Node.js application, it would be using CommonJS modules to organize each object in its individual file.  We can utilize these modules in the browser by using [browserify](http://browserify.org/).  Browserify can be installed using the following command:
 
@@ -370,6 +388,8 @@ or
 ```shell
   sudo npm install -g browserify
 ```
+
+### Application Changes for Browserify
 
 To convert what we have to using modules we have to logically break out the JavaScript that we have inline in `index.html` and put it into seperate files.  There are a number of Backbone objects that can be pulled out.  There is a collection, model, two views and a router.  Each one of these can be put into their own file.  The way we write a module is by wrapping the code in a `module.exports = function(arg1, arg2)` function.  To do the user management users collection in a module, the  code will look like this:
 
@@ -509,6 +529,8 @@ router.on('route:editUser', function(id) {
 Backbone.history.start();
 ```
 
+### Running Browserify Command
+
 Once all of the modules are in place, we need to bundle up the modules into a single JavaScript file.  This can be achieved by running the following command from the root of your workspace.
 
 ```shell
@@ -557,13 +579,17 @@ The inline script will now look like this:
     </script>
 ```
 
+### Setup Application for Testing Browserify
+
 Once all of the above steps are complete, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
 
 
 ## References
   - [backbone.js](http://backbonejs.org)
   - [backbonetutorials.com](http://backbonetutorials.com/)
+  - [browserify](http://browserify.org)
   - [Grunt](http://gruntjs.com)
+  - [grunt-contrib-handlebars](https://github.com/gruntjs/grunt-contrib-handlebars)
   - [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst)
   - [Handlebars](http://handlebarsjs.com)
   - [Node](http://nodejs.org)
