@@ -333,6 +333,16 @@ The `edit-user` template also needs to change.  The new `edit-user` template sho
 
 Rename `edit-user.tpl` to `edit-user.hbs` now.
 
+Because Handlebars will perform templating slightly different than Underscore, we need to make changes to our JavaScript functions.  First of all we can remove the `init()` function and of course the call to it `    window.onload = init;`.  Then we need to change our `createTemplate` function, first to handle the differing template file extensions (.hbs) and also to handle the different in how Handlebars handles the pathing.  The `createTemplate` function should look like this:
+
+``` JavaScript
+function createTemplate(templateName, data) {
+  var templatePath = 'templates/' + templateName + '.hbs';
+  var templateString = window['JST'][templatePath](data);
+  return templateString;
+}
+```  
+
 ### Grunt Task Configuration for Handlebars
 
 The next step is to pre-compile our handlebars templates so that they can be used in our application.  To do this we need to use a different Grunt plugin.  The plugin [grunt-contrib-handlebars](https://github.com/gruntjs/grunt-contrib-handlebars) is what we need to pre-compile handlebars templates.  Run this command on the command line to un-install and remove grunt-contrib-jst from the `package.json` file.
