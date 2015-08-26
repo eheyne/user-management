@@ -333,7 +333,7 @@ The `edit-user` template also needs to change.  The new `edit-user` template sho
 
 Rename `edit-user.tpl` to `edit-user.hbs` now.
 
-Because Handlebars will perform templating slightly different than Underscore, we need to make changes to our JavaScript functions.  First of all we can remove the `init()` function and of course the call to it `    window.onload = init;`.  Then we need to change our `createTemplate` function, first to handle the differing template file extensions (.hbs) and also to handle the different in how Handlebars handles the pathing.  The `createTemplate` function should look like this:
+Because Handlebars will perform templating slightly different than Underscore, we need to make changes to our JavaScript functions.  First of all we can remove the `init()` function and of course the call to it `    window.onload = init;`.  Then we need to change our `createTemplate` function, first to handle the differing template file extensions (.hbs) and also to handle the difference in how Handlebars handles the pathing.  The `createTemplate` function should look like this:
 
 ``` JavaScript
 function createTemplate(templateName, data) {
@@ -543,12 +543,12 @@ module.exports = Backbone.Router.extend({
 });
 ```
 
-Now modularize the main portion of the application into an `application.js` file that is located at the root of your workspace in the `scripts` folder.  This will include the JavaScript code that follows the functions in the inline JavaScript code.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
+Now modularize the main portion of the application into an `application.js` file that is located at the root of your workspace in the `scripts` folder.  This will include the JavaScript code that listens to changes to routes as well as the call `Backbone.history.start()` to start the Backbone application.  Also since all of the Backbone objects were cut out of the `index.html` file, it is necessary to make a few more code changes to require the modules that are used here.  The following `requires` are needed above where the Backbone views and routers are used. 
 
 ```javascript
-  var UserList = require('./scripts/views/user-list');
-  var EditUser = require('./scripts/views/edit-user');
-  var Router = require('./scripts/routers/application');
+  var UserList = require('./views/user-list');
+  var EditUser = require('./views/edit-user');
+  var Router = require('./routers/application');
 ```
 
 We also will be wrapping the logic into a constructor function so that we can create an object of type `Application` to be put on the global `window` object.  The function will look like this:
@@ -599,6 +599,37 @@ function Application() {
 window.App = new Application();
 ```
 
+The last change that will be necessary is to the `index.html` file.  This files script element will now look like this
+:
+
+```JavaScript
+    <script>
+      function createTemplate(templateName, data) {
+        var templatePath = 'templates/' + templateName + '.hbs';
+        var templateString = window['JST'][templatePath](data);
+        return templateString;
+      }
+      $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+        options.url = 'http://backbonejs-beginner.herokuapp.com' + options.url;
+      });
+      $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+          if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+              o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+          } else {
+            o[this.name] = this.value || '';
+          }
+        });
+        return o;
+      };
+    </script>
+```
+
 ### Running Browserify Command
 
 Once all of the modules are in place, we need to bundle up the modules into a single JavaScript file.  This can be achieved by running the following command from the root of your workspace.
@@ -623,6 +654,34 @@ There is one additional change necessary to make in the `index.html` file.  This
 
 Once all of the above steps are complete, test the application using `http-server` and browsing to `localhost:8080` as is described above in step 1.  Ensure that it still works the same as it did before.
 
+### Grunt Task Configuration for Browserify
+
+To avoid running the browserify command every time a code change is made we can add a task to grunt to do it for us.  The plugin [grunt-browserify](https://github.com/jmreidy/grunt-browserify) is what we need to do this.  Run this command on the command line install grunt-browserify and put it in your `devDependencies` of your `package.json` file.
+
+```shell
+npm install grunt-browserify --save-dev
+```
+
+The `devDependencies` section of the new package.json file should look like this:
+
+```javascript
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-handlebars": "~0.8.0",
+    "grunt-browserify": "^4.0.0",
+  }
+```
+
+Now we have to setup the configuration for browserify in `Gruntfile.js`.  Open this file and add a section called `browserify`.  The configuration will take what we ran on the command line (`browserify ./scripts/application.js -o ./scripts/user-management.js`) and put it in our Gruntfile.js, where the source (`src`) is `scripts/application.js` and the output or destination (`dest`) is `scripts/user-management.js`.  It should look like this:
+
+```javascript
+    browserify: {
+      dist: {
+        src: ['scripts/application.js'],
+        dest: 'scripts/user-management.js'
+      }
+    }
+```
 
 ## References
   - [backbone.js](http://backbonejs.org)
