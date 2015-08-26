@@ -131,7 +131,7 @@ npm install -g grunt-cli
 
 If you have not used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started guide](http://gruntjs.com/getting-started), as it explains how to create a Gruntfile as well as install and use Grunt plugins. Pay special attention on the section where it talks about the `package.json` file as we will need to create one for this part of the project. For this exercise we can just create the `package.json` file in the root of your workspace and put an empty JavaScript object in it `{  }` for now.  Using the `--save` and `--save-dev` options when executing an `npm` command will add content to this file.  This is demonstrated below.
 
-Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are string to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
+Grunt allows the use of plugins. A Grunt plugin is a Node package that can be published via NPM. For what we are trying to accomplish there already exists a plugin called [grunt-contrib-jst](https://github.com/gruntjs/grunt-contrib-jst).
 
 ### Application Changes for Grunt Task 
 
